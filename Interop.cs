@@ -7,6 +7,11 @@ using UnityEngine.Assertions;
 
 namespace CavalierContours
 {
+    /// <summary>
+    /// Wrapper for the CavalierContours FFI functions, should have no Unity dependencies.
+    /// </summary>
+    
+    
     public class Interop
     {
         private const string DLL_NAME = "cavalier_contours_ffi";
@@ -58,18 +63,6 @@ namespace CavalierContours
             out uint count);
         
         
-        private static IntPtr GetPline(CavcVertex[] cavVerts, bool isClosed)
-        {
-            IntPtr plinePointer;
-            byte is_closed = isClosed ? (byte) 1 : (byte) 0;
-            int errorCode = cavc_pline_create(cavVerts, (uint) cavVerts.Length, is_closed, out plinePointer);
-            if (errorCode != 0) Debug.Log("Error: cavc_pline_create");
-            uint count;
-            cavc_pline_get_vertex_count(plinePointer, out count);
-            Debug.Assert(count == cavVerts.Length);
-            return plinePointer;
-        }
-        
         public static CavcVertex[] ParallelOffset(CavcVertex[] cavVerts, bool isClosed, double offsetDelta)
         {
             IntPtr plinePointer = GetPline(cavVerts, isClosed);
@@ -89,7 +82,7 @@ namespace CavalierContours
         {
             IntPtr resultListPointer;
             int statusOutput1 = cavc_pline_parallel_offset(plinePointer, offsetDelta, options, out resultListPointer);
-            if (statusOutput1 != 0) Debug.Log("Error: cavc_pline_parallel_offset: Rust: Pline is null");
+            if (statusOutput1 != 0) Debug.Log("Error: cavc_pline_parallel_offset: Rust: Pline is null"); //todo replace with non unity log
 
             uint count2;
             cavc_plinelist_get_count(resultListPointer, out count2);
@@ -97,7 +90,7 @@ namespace CavalierContours
             uint position = 0;
             IntPtr offsettedPlinePointer;
             int statusOutput2 = cavc_plinelist_get_pline(resultListPointer, position, out offsettedPlinePointer);
-            if (statusOutput2 != 0) Debug.Log("Error: cavc_pline_parallel_offset: Rust: PlineList is null");
+            if (statusOutput2 != 0) Debug.Log("Error: cavc_pline_parallel_offset: Rust: PlineList is null"); //todo replace with non unity log
 
             uint count3;
             cavc_pline_get_vertex_count(offsettedPlinePointer, out count3);
@@ -109,7 +102,7 @@ namespace CavalierContours
         {
             IntPtr aabbindex;
             int result = cavc_pline_create_approx_aabbindex(pline, out aabbindex);
-            if (result != 0) Debug.Log("Error: cavc_pline_create_approx_aabbindex: Rust: Pline is null");
+            if (result != 0) Debug.Log("Error: cavc_pline_create_approx_aabbindex: Rust: Pline is null"); //todo replace with non unity log
         
             CavcPlineParallelOffsetO cavcPlineParallelOffsetO = new CavcPlineParallelOffsetO
             {
@@ -125,6 +118,18 @@ namespace CavalierContours
             Marshal.FreeHGlobal(aabbindex);
             
             return cavcPlineParallelOffsetOPtr;
+        }
+        
+        private static IntPtr GetPline(CavcVertex[] cavVerts, bool isClosed)
+        {
+            IntPtr plinePointer;
+            byte is_closed = isClosed ? (byte) 1 : (byte) 0;
+            int errorCode = cavc_pline_create(cavVerts, (uint) cavVerts.Length, is_closed, out plinePointer);
+            if (errorCode != 0) Debug.Log("Error: cavc_pline_create"); //todo replace with non unity log
+            uint count;
+            cavc_pline_get_vertex_count(plinePointer, out count);
+            Debug.Assert(count == cavVerts.Length);
+            return plinePointer;
         }
         
         private static CavcVertex[] VertsFromPline(IntPtr pline)

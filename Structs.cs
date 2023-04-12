@@ -3,6 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace CavalierContours
 {
+    /// <summary>
+    /// Blittable struct for passing options to cavc_pline_parallel_offset.
+    /// </summary>
+    
+    
     [StructLayout(LayoutKind.Sequential)]
     public struct CavcPlineParallelOffsetO
     {
