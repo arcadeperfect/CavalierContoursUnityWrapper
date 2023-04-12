@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
+// Blittable structs
+
+
 namespace CavalierContours
 {
     /// <summary>
@@ -18,6 +21,9 @@ namespace CavalierContours
         public byte HandleSelfIntersects;
     }
     
+    /// <summary>
+    /// Blittable struct for representing Cavc polylines.
+    /// </summary>
     
     [StructLayout(LayoutKind.Sequential)]
     public struct CavcPolyline {
@@ -32,6 +38,10 @@ namespace CavalierContours
             this.is_closed = is_closed;
         }
     }
+    
+    /// <summary>
+    /// Blittable struct for representing Cavc vertexes.
+    /// </summary>
     
     [StructLayout(LayoutKind.Sequential)]
     public struct CavcVertex
@@ -48,3 +58,4 @@ namespace CavalierContours
         }
     }
 }
+// blittable structs for passing data to cavc
