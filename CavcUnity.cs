@@ -1,5 +1,7 @@
 ﻿
 
+using System.Collections.Generic;
+using System.Linq;
 using Sirenix.OdinInspector.Editor.TypeSearch;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -12,16 +14,19 @@ namespace CavalierContours
     
     public static class CavcUnity
     {
-        public static Vector2[] ParralelOffset(Vector2[] input, float offsetDelta, bool isClosed)
+        public static List<Vector2[]> ParralelOffset(Vector2[] input, float offsetDelta, bool isClosed)
         {
-            return Interop.ParallelOffset(input.ToCavcVertexArray(), isClosed, (double) offsetDelta).ToVector2Array();
-        }
-        
-        public static Vector2[] ParralelOffset(Vector2[] input, float offsetDelta, bool isClosed, OffsetOptions options)
-        {
-            return Interop.ParallelOffset(input.ToCavcVertexArray(), isClosed, (double) offsetDelta, options).ToVector2Array();
+            return Interop.ParallelOffset(input.ToCavcVertexArray(), isClosed, (double)offsetDelta)
+                .Select(cavcVertex => cavcVertex.ToVector2Array())
+                .ToList();
         }
 
+        public static List<Vector2[]> ParralelOffset(Vector2[] input, float offsetDelta, bool isClosed, OffsetOptions options)
+        {
+            return Interop.ParallelOffset(input.ToCavcVertexArray(), isClosed, (double)offsetDelta, options)
+                .Select(cavcVertex => cavcVertex.ToVector2Array())
+                .ToList();
+        }
         public static Vector2[] ToVector2Array(this CavcVertex[] cavcVertices)
         {
             var vector2s = new Vector2[cavcVertices.Length];

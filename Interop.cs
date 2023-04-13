@@ -63,13 +63,13 @@ namespace CavalierContours
             out uint count);
         
         
-        public static CavcVertex[] ParallelOffset(CavcVertex[] cavVerts, bool isClosed, double offsetDelta)
+        public static List<CavcVertex[]> ParallelOffset(CavcVertex[] cavVerts, bool isClosed, double offsetDelta)
         {
             IntPtr plinePointer = GetPline(cavVerts, isClosed);
             return ParallelOffsetInernal(plinePointer, offsetDelta, IntPtr.Zero);
         }
         
-        public static CavcVertex[] ParallelOffset(CavcVertex[] cavVerts, bool isClosed, double offsetDelta, OffsetOptions options)
+        public static List<CavcVertex[]> ParallelOffset(CavcVertex[] cavVerts, bool isClosed, double offsetDelta, OffsetOptions options)
         {
             IntPtr optionsPtr = GetOptions(IntPtr.Zero, options.PosEqualEps, options.SliceJoinEps, options.OffsetDistEps, options.HandleSelfIntersects);
             IntPtr plinePointer = GetPline(cavVerts, isClosed);
@@ -78,24 +78,26 @@ namespace CavalierContours
             return result;
         }
 
-        private static CavcVertex[] ParallelOffsetInernal(IntPtr plinePointer, double offsetDelta, IntPtr options)
+        private static List<CavcVertex[]> ParallelOffsetInernal(IntPtr plinePointer, double offsetDelta, IntPtr options)
         {
             IntPtr resultListPointer;
             int statusOutput1 = cavc_pline_parallel_offset(plinePointer, offsetDelta, options, out resultListPointer);
             if (statusOutput1 != 0) Debug.Log("Error: cavc_pline_parallel_offset: Rust: Pline is null"); //todo replace with non unity log
 
-            uint count2;
-            cavc_plinelist_get_count(resultListPointer, out count2);
+            uint offsetPlineCount;
+            cavc_plinelist_get_count(resultListPointer, out offsetPlineCount);
 
-            uint position = 0;
-            IntPtr offsettedPlinePointer;
-            int statusOutput2 = cavc_plinelist_get_pline(resultListPointer, position, out offsettedPlinePointer);
-            if (statusOutput2 != 0) Debug.Log("Error: cavc_pline_parallel_offset: Rust: PlineList is null"); //todo replace with non unity log
-
-            uint count3;
-            cavc_pline_get_vertex_count(offsettedPlinePointer, out count3);
-
-            return VertsFromPline(offsettedPlinePointer);
+            List<CavcVertex[]> result = new();
+            
+            for (uint i = 0; i < offsetPlineCount; i++)
+            {
+                uint position = i;
+                IntPtr offsettedPlinePointer;
+                int statusOutput2 = cavc_plinelist_get_pline(resultListPointer, position, out offsettedPlinePointer);
+                if (statusOutput2 != 0) Debug.Log("Error: cavc_pline_parallel_offset: Rust: PlineList is null"); //todo replace with non unity log
+                result.Add(VertsFromPline(offsettedPlinePointer));
+            }
+            return result;
         }
         
         private static IntPtr GetOptions(IntPtr pline, double posEqualEps, double sliceJoinEps, double offsetDistEps, bool HandleSelfIntersects)
