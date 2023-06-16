@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace CavalierContours
 {
@@ -71,8 +69,8 @@ namespace CavalierContours
         
         public static List<CavcVertex[]> ParallelOffset(CavcVertex[] cavVerts, bool isClosed, double offsetDelta, OffsetOptions options)
         {
-            IntPtr optionsPtr = GetOptions(IntPtr.Zero, options.PosEqualEps, options.SliceJoinEps, options.OffsetDistEps, options.HandleSelfIntersects);
             IntPtr plinePointer = GetPline(cavVerts, isClosed);
+            IntPtr optionsPtr = GetOptions(plinePointer, options.PosEqualEps, options.SliceJoinEps, options.OffsetDistEps, options.HandleSelfIntersects);
             var result = ParallelOffsetInernal(plinePointer,  offsetDelta, optionsPtr);
             Marshal.FreeHGlobal(optionsPtr);
             return result;
@@ -108,11 +106,11 @@ namespace CavalierContours
         
             CavcPlineParallelOffsetO cavcPlineParallelOffsetO = new CavcPlineParallelOffsetO
             {
-                AabbIndex = aabbindex,
-                PosEqualEps = posEqualEps,
-                SliceJoinEps = sliceJoinEps,
-                OffsetDistEps = offsetDistEps,
-                HandleSelfIntersects = (byte)(HandleSelfIntersects ? 1 : 0)
+                AabbIndex = aabbindex, //IntPtr
+                PosEqualEps = posEqualEps, //double
+                SliceJoinEps = sliceJoinEps, //double
+                OffsetDistEps = offsetDistEps, //double
+                HandleSelfIntersects = (byte)(HandleSelfIntersects ? 1 : 0) //byte
             };
         
             IntPtr cavcPlineParallelOffsetOPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(CavcPlineParallelOffsetO)));
@@ -130,7 +128,7 @@ namespace CavalierContours
             if (errorCode != 0) Debug.Log("Error: cavc_pline_create"); //todo replace with non unity log
             uint count;
             cavc_pline_get_vertex_count(plinePointer, out count);
-            Debug.Assert(count == cavVerts.Length);
+            Debug.Assert(count == cavVerts.Length); //todo replace with non unity
             return plinePointer;
         }
         
